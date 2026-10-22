@@ -1,55 +1,92 @@
 # cc-win-traps
 
-Windows で Claude Code を自動で回すとき、**エラーを出さずに結果だけ壊れる**落とし穴を14か所、あなたの PC でわざと踏んで、起きるかどうかを表で出すスクリプトです。読むだけで、`tmp\traps` の外には何も書きません。
+A script that deliberately triggers 14 traps where Claude Code automation on Windows **breaks without an error**, and prints which ones happen on your machine. Read-only except for files under `tmp\traps` next to the script. Also packaged as a Claude Code plugin with one skill, `win-traps-check`.
 
-English: [README.en.md](README.en.md)
+日本語: [README.ja.md](README.ja.md)
 
-## 使い方
+## Use it as a Claude Code plugin
 
-Windows PowerShell 5.1 と Python が要ります（T14 は `claude` も使います）。
+```
+/plugin marketplace add cart231-ffly-b/cc-win-traps
+/plugin install cc-win-traps@cc-win-traps
+```
+
+Then ask Claude, for example:
+
+- "Which of the Windows traps happen on this machine?"
+- "My script works when I run it by hand but fails in Task Scheduler. Check the Windows traps."
+- "Japanese text I pipe into python arrives as ??. Is that one of the known traps?"
+
+The skill runs the script with `-SkipSlow -SkipClaude`, shows a table, and gives the one-line fix for each trap that reproduced. It does not change your files.
+
+## Use it without the plugin
+
+Needs Windows PowerShell 5.1 and Python (T14 also calls `claude`).
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 ```
 
-- `-SkipSlow` … 書き込み中のファイルのサイズを見る T13（数秒かかる）を飛ばす
-- `-SkipClaude` … `claude` を呼ぶ T14 を飛ばす
+- `-SkipSlow` skips T13 (watching the size of a file being written, a few seconds)
+- `-SkipClaude` skips T14 (calls `claude`)
 
-`REPRODUCED` は、その穴があなたの PC で起きたということです。**判定は -File で呼んだときの結果で見てください**（`-Command` で呼ぶと、それ自体が T01 の穴を踏みます）。
+`REPRODUCED` means the trap happened on your machine. **Run it with `-File`**: calling it through `-Command` steps on T01 itself.
 
-## 14か所
+## The 14 traps
 
-| Id | 何が壊れるか | 作者の PC での結果 |
+| Id | What breaks | Author's machine |
 | --- | --- | --- |
-| T01 | `-Command` で呼ぶと、終了コード 2 が 1 になる | `-File=2 -Command=1` |
-| T02 | `-File` で `-Path a b` と渡すと、b が黙って捨てられる | `count=1`、終了コード 0 |
-| T03 | `-File` で `-Path a,b` と渡すと、1つの文字列になる | `first=a,b` |
-| T04 | パイプで渡した日本語が `?` になる | バイト `3f3f` |
-| T05 | UTF-8 の出力を既定のコードページで読むと文字化け | 2文字が別の4文字に |
-| T06 | リダイレクトしたときだけ Python が落ちる | UnicodeEncodeError、終了コード 1 |
-| T07 | `python -I` は `PYTHONIOENCODING` を読まない | `-I` で 1、外すと 0 |
-| T08 | BOM のない日本語入りの `.ps1` | 出力が元と違う |
-| T09 | 改行が LF の `.cmd` がコメントを実行する | `cp932=broken cp65001=ok` |
-| T10 | 一行で渡すと、呼ぶ側が `$i` を先に展開する | 構文エラー、終了コード 1 |
-| T11 | `-LiteralPath` と `-Include` を組むと絞り込みが効かない | `.md` も返った |
-| T12 | `"..."` の中のバッククォートが改行やタブになる | 改行が入った |
-| T13 | 書き込み中のファイルが 0 バイトに見える（AppData の下） | 一覧 0、実際 5,000,000 |
-| T14 | `--allowedTools` の後ろのプロンプトが飲み込まれる | `Input must be provided ...` |
+| T01 | `exit 2` becomes `1` through `-Command` | `-File=2 -Command=1` |
+| T02 | `-File` with `-Path a b` silently drops `b` | `count=1`, exit 0 |
+| T03 | `-File` with `-Path a,b` gives one string | `first=a,b` |
+| T04 | non-ASCII piped to a native program arrives as `?` | bytes `3f3f` |
+| T05 | UTF-8 output read with the default code page is mojibake | 2 characters became 4 others |
+| T06 | Python crashes only when redirected | UnicodeEncodeError, exit 1 |
+| T07 | `python -I` ignores `PYTHONIOENCODING` | 1 with `-I`, 0 without |
+| T08 | a non-ASCII `.ps1` without BOM | output differs from source |
+| T09 | a `.cmd` with LF line endings runs its comments | `cp932=broken cp65001=ok` |
+| T10 | a one-liner: the caller expands `$i` first | syntax error, exit 1 |
+| T11 | `-Include` is ignored with `-LiteralPath` | the `.md` came back too |
+| T12 | backticks inside `"..."` become newlines or tabs | a newline appeared |
+| T13 | a file being written shows 0 bytes (under AppData) | listed 0, actual 5,000,000 |
+| T14 | `claude -p --allowedTools X "prompt"` swallows the prompt | `Input must be provided ...` |
 
-作者の PC: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Claude Code 2.1.304、日本語の Windows（コードページ 932）。2026-10-20〜21 に確認。
+Author's machine: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Claude Code 2.1.304, Japanese Windows (code page 932), checked 2026-10-20/21.
 
-**英語版の Windows（1252 / 437）では結果が変わります。** T09 は起きませんでした。T05・T06・T09 は、その PC の既定のコードページで試すように作ってあります。
+**Results differ on English Windows (1252 / 437).** T09 did not break there. T05, T06 and T09 test with your machine's own default code page.
 
-## 直し方
+## Fixes
 
-症状と確かめ方、直し方は無料の記事にまとめています。
+| Id | One-line fix |
+| --- | --- |
+| T01 | Call scripts with `-File`, or end `-Command` with `; exit $LASTEXITCODE` |
+| T02 | Add `[CmdletBinding()]` so an extra argument stops with an error |
+| T03 | Accept one string and split it yourself with `-split ','` |
+| T04 | Write long text to a UTF-8 file and pass an ASCII instruction; set `$OutputEncoding` to UTF-8 |
+| T05 | Set `[Console]::OutputEncoding = [Text.Encoding]::UTF8` on the reading side |
+| T06 | Set `PYTHONIOENCODING=utf-8` on the sending side |
+| T07 | Drop `-I`, or call `sys.stdout.reconfigure(encoding="utf-8")` in the script |
+| T08 | Save `.ps1` files as UTF-8 with BOM, or keep them ASCII-only |
+| T09 | Save `.cmd` / `.bat` files with CRLF line endings |
+| T10 | Put the logic in a `.ps1` and run it with `-File` |
+| T11 | Filter extensions with `Where-Object` instead of `-Include` |
+| T12 | Use single-quoted here-strings (`@'...'@`) for text with backticks |
+| T13 | Open the file and read its length before concluding it is empty |
+| T14 | Send the prompt on stdin, not as a positional argument |
 
-- エラーなしで壊れる14か所（note）: https://note.com/sodateru_ai/n/na7d9ee2a36fa
+A longer write-up (Japanese, free): https://note.com/sodateru_ai/n/na7d9ee2a36fa
 
-14か所を最初から踏まないようにした部品（書き込み先を絞る安全装置、夜の無人実行、健康診断、CLAUDE.md の型、試験一式）は「cc-win-kit」として有料で出しています。
+## Troubleshooting
 
-- https://note.com/sodateru_ai/n/ndad0eb6feaa6
+- **"running scripts is disabled on this system"**: keep `-ExecutionPolicy Bypass` in the command.
+- **`python` is not on PATH**: T04–T07 and T13 need it. Without it their rows are not meaningful; install Python 3 and run again.
+- **Everything looks fine but your scheduled job still fails**: run the job's exact command line once by hand with `-File`, and compare the exit code with what Task Scheduler shows.
+- **The table is mojibake**: run it from Windows PowerShell 5.1, not from a shell that re-encodes output.
 
-## ライセンス
+## Related
 
-MIT（[LICENSE](LICENSE)）。
+The author also sells **cc-win-kit** ($19), which adds a write guard for Claude Code, an unattended runner and a doctor that scans your files for these traps: https://payhip.com/b/bRnDJ . This repository works on its own without it.
+
+## License
+
+MIT ([LICENSE](LICENSE)).

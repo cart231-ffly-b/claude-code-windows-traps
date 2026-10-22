@@ -1,0 +1,8 @@
+{
+  "name": "cc-win-traps",
+  "version": "0.1.0",
+  "description": "Find out which silent Windows failures (exit codes, encodings, BOM, LF .cmd, -File arguments) hit Claude Code automation on your machine.",
+  "author": { "name": "Kamijo Aoto" },
+  "license": "MIT",
+  "icon": ".claude-plugin/icon.png"
+}

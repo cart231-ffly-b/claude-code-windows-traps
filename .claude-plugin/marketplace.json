@@ -1,0 +1,12 @@
+{
+  "name": "cc-win-traps",
+  "owner": { "name": "Kamijo Aoto" },
+  "description": "Checks for silent Windows failures in Claude Code automation.",
+  "plugins": [
+    {
+      "name": "cc-win-traps",
+      "source": "./",
+      "description": "Find out which silent Windows failures hit Claude Code automation on your machine."
+    }
+  ]
+}
