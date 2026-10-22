@@ -17,8 +17,15 @@ $jp = [string][char]0x65E5 + [char]0x672C      # two kanji
 # Bash tool and some terminals switch to 65001, which hides T05 and T09, so use the default instead
 $oem = [System.Globalization.CultureInfo]::CurrentCulture.TextInfo.OEMCodePage
 $rows = @()
+# T04-T07 and T13 run python. Without a real interpreter (none on PATH, or only the Microsoft Store
+# stub, which prints nothing and exits 9009) their verdicts mean nothing: T05 used to say REPRODUCED.
+$pyVer = ''
+try { $pyVer = [string]((& python -c "import sys; print('%d.%d.%d' % sys.version_info[:3])" 2>$null) | Select-Object -First 1) } catch {}
+$pyIds = @('T04', 'T05', 'T06', 'T07', 'T13')
 function Add([string]$id, [string]$trap, [bool]$repro, [string]$evidence) {
-    $script:rows += [pscustomobject]@{ Id = $id; Trap = $trap; Result = $(if ($repro) { 'REPRODUCED' } else { 'NOT REPRODUCED' }); Evidence = $evidence }
+    $res = $(if ($repro) { 'REPRODUCED' } else { 'NOT REPRODUCED' })
+    if (($pyIds -contains $id) -and [string]::IsNullOrEmpty($pyVer)) { $res = 'CANNOT CHECK'; $evidence = 'no real python (not on PATH, or only the Store stub)' }
+    $script:rows += [pscustomobject]@{ Id = $id; Trap = $trap; Result = $res; Evidence = $evidence }
 }
 function PS-File([string]$f, [string[]]$a = @()) { & powershell.exe @(@('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $f) + $a) }
 

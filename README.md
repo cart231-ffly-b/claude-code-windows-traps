@@ -81,7 +81,7 @@ A longer write-up (Japanese, free): https://note.com/sodateru_ai/n/na7d9ee2a36fa
 ## Troubleshooting
 
 - **"running scripts is disabled on this system"**: keep `-ExecutionPolicy Bypass` in the command.
-- **`python` is not on PATH**: T04–T07 and T13 need it. Without it their rows are not meaningful; install Python 3 and run again.
+- **`CANNOT CHECK` on T04–T07 and T13**: these need a real Python. The script shows this when `python` is not on PATH or only the Microsoft Store stub answers (it prints nothing and exits 9009). Install Python 3 from python.org and run again.
 - **Everything looks fine but your scheduled job still fails**: run the job's exact command line once by hand with `-File`, and compare the exit code with what Task Scheduler shows.
 - **The table is mojibake**: run it from Windows PowerShell 5.1, not from a shell that re-encodes output.
 
