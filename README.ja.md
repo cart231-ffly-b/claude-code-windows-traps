@@ -48,7 +48,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 
 - エラーなしで壊れる14か所（note）: https://note.com/sodateru_ai/n/na7d9ee2a36fa
 
-14か所を最初から踏まないようにした部品（書き込み先を絞る安全装置、夜の無人実行、健康診断、CLAUDE.md の型、試験一式）は「cc-win-kit」として有料で出しています。
+14か所を最初から踏まないようにした部品（書き込み先を絞る安全装置、夜の無人実行、健康診断、CLAUDE.md の型、試験一式）は「cc-win-kit」として有料で出しています（note、2026年10月31日公開）。このスクリプトは、キットが無くても単独で使えます。
 
 - https://note.com/sodateru_ai/n/ndad0eb6feaa6
 
