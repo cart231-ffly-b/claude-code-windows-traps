@@ -2,6 +2,10 @@
 
 A script that deliberately triggers 14 traps where Claude Code automation on Windows **breaks without an error**, and prints which ones happen on your machine. Read-only except for files under `tmp\traps` next to the script. Also packaged as a Claude Code plugin (`cc-win-traps`) with one skill, `win-traps-check`.
 
+![Output on the author's machine: 13 of 13 traps reproduced (Japanese Windows 11, PowerShell 5.1, Python 3.13)](images/result.png)
+
+*Output on the author's machine (Japanese Windows 11, code page 932). Results differ by machine: on English Windows, T09 did not break.*
+
 日本語: [README.ja.md](README.ja.md)
 
 ## Use it as a Claude Code plugin

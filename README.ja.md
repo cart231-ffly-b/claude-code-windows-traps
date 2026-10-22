@@ -4,6 +4,10 @@ Windows で Claude Code を自動で回すとき、**エラーを出さずに結
 
 English / Claude Code プラグインとしての使い方: [README.md](README.md)
 
+![作者の PC での結果: 13件すべて REPRODUCED（日本語の Windows 11、PowerShell 5.1、Python 3.13）](images/result.png)
+
+*作者の PC（日本語の Windows 11、コードページ 932）での結果です。PC によって変わります（英語版の Windows では T09 は起きませんでした）。*
+
 ## 使い方
 
 Windows PowerShell 5.1 と Python が要ります（T14 は `claude` も使います）。
