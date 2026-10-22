@@ -40,6 +40,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 
 **英語版の Windows（1252 / 437）では結果が変わります。** T09 は起きませんでした。T05・T06・T09 は、その PC の既定のコードページで試すように作ってあります。
 
+**Python 3.15（2026-10-09 公開）は UTF-8 が既定です（PEP 686）。** 3.15 以降では T06・T07 は NOT REPRODUCED になる見込みです。作者の PC は 3.13 で、3.15 の既定と同じ `-X utf8` を付けて流すと落ちませんでした。
+
 ## 直し方
 
 症状と確かめ方、直し方は無料の記事にまとめています。

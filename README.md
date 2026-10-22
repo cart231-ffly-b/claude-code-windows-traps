@@ -55,6 +55,8 @@ Author's machine: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Cl
 
 **Results differ on English Windows (1252 / 437).** T09 did not break there. T05, T06 and T09 test with your machine's own default code page.
 
+**Python 3.15 (released 2026-10-09) makes UTF-8 the default (PEP 686).** On 3.15 or later, T06 and T07 are expected to show NOT REPRODUCED. The author's machine runs 3.13; with `-X utf8` (UTF-8 mode, the 3.15 default) the same script did not crash.
+
 ## Fixes
 
 | Id | One-line fix |
