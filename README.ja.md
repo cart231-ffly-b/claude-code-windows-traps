@@ -1,4 +1,4 @@
-# cc-win-traps
+# claude-code-windows-traps（プラグイン名: cc-win-traps）
 
 Windows で Claude Code を自動で回すとき、**エラーを出さずに結果だけ壊れる**落とし穴を14か所、あなたの PC でわざと踏んで、起きるかどうかを表で出すスクリプトです。読むだけで、`tmp\traps` の外には何も書きません。
 

@@ -1,13 +1,13 @@
-# cc-win-traps
+# claude-code-windows-traps
 
-A script that deliberately triggers 14 traps where Claude Code automation on Windows **breaks without an error**, and prints which ones happen on your machine. Read-only except for files under `tmp\traps` next to the script. Also packaged as a Claude Code plugin with one skill, `win-traps-check`.
+A script that deliberately triggers 14 traps where Claude Code automation on Windows **breaks without an error**, and prints which ones happen on your machine. Read-only except for files under `tmp\traps` next to the script. Also packaged as a Claude Code plugin (`cc-win-traps`) with one skill, `win-traps-check`.
 
 日本語: [README.ja.md](README.ja.md)
 
 ## Use it as a Claude Code plugin
 
 ```
-/plugin marketplace add cart231-ffly-b/cc-win-traps
+/plugin marketplace add cart231-ffly-b/claude-code-windows-traps
 /plugin install cc-win-traps@cc-win-traps
 ```
 
