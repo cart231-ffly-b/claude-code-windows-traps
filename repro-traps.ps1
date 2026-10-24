@@ -139,3 +139,9 @@ if (-not $SkipClaude) {
 
 $rows | Format-Table -AutoSize -Wrap | Out-String -Width 220
 'PowerShell ' + $PSVersionTable.PSVersion + ' / ' + ((& python --version) 2>&1) + ' / ' + (Get-Date -Format 'yyyy-MM-dd')
+$hit = @($rows | Where-Object { $_.Result -eq 'REPRODUCED' }).Count
+if ($hit -gt 0) {
+    ''
+    "$hit trap(s) reproduced on this machine. Workaround for each: README.md in this repository."
+    'cc-win-kit (paid, by the same author) adds a write guard, an unattended runner and a doctor that scans your files for these: https://payhip.com/b/bRnDJ'
+}
