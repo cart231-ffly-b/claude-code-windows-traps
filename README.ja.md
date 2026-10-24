@@ -1,6 +1,6 @@
 # claude-code-windows-traps（プラグイン名: cc-win-traps）
 
-Windows で Claude Code を自動で回すとき、**エラーを出さずに結果だけ壊れる**落とし穴を14か所、あなたの PC でわざと踏んで、起きるかどうかを表で出すスクリプトです。読むだけで、`tmp\traps` の外には何も書きません。
+Windows で Claude Code を自動で回すとき、**エラーを出さずに結果だけ壊れる**落とし穴を15か所、あなたの PC でわざと踏んで、起きるかどうかを表で出すスクリプトです。読むだけで、`tmp\traps` の外には何も書きません。
 
 English / Claude Code プラグインとしての使い方: [README.md](README.md)
 
@@ -10,18 +10,18 @@ English / Claude Code プラグインとしての使い方: [README.md](README.m
 
 ## 使い方
 
-Windows PowerShell 5.1 と Python が要ります（T14 は `claude` も使います）。
+Windows PowerShell 5.1 と Python が要ります（T14 と T15 は `claude` も使います）。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 ```
 
 - `-SkipSlow` … 書き込み中のファイルのサイズを見る T13（数秒かかる）を飛ばす
-- `-SkipClaude` … `claude` を呼ぶ T14 を飛ばす
+- `-SkipClaude` … `claude` を呼ぶ T14 と T15 を飛ばす
 
 `REPRODUCED` は、その穴があなたの PC で起きたということです。**判定は -File で呼んだときの結果で見てください**（`-Command` で呼ぶと、それ自体が T01 の穴を踏みます）。
 
-## 14か所
+## 15か所
 
 | Id | 何が壊れるか | 作者の PC での結果 |
 | --- | --- | --- |
@@ -39,6 +39,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 | T12 | `"..."` の中のバッククォートが改行やタブになる | 改行が入った |
 | T13 | 書き込み中のファイルが 0 バイトに見える（AppData の下） | 一覧 0、実際 5,000,000 |
 | T14 | `--allowedTools` の後ろのプロンプトが飲み込まれる | `Input must be provided ...` |
+| T15 | 全部拒否する Python のフックが、日本語の名前のフォルダへの書き込みだけを通す | `hook called=True written=True`（2026-10-24、Claude Code 2.1.310） |
 
 作者の PC: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Claude Code 2.1.304、日本語の Windows（コードページ 932）。2026-10-20〜21 に確認。
 
@@ -60,7 +61,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 
 - 個人データを集めない・保存しない・送らない。通信も利用状況の送信もしません。
 - スキルが動かすのは同梱の `repro-traps.ps1` だけで、`-SkipSlow -SkipClaude` 付きです。このとき書き込むのはスクリプトの隣の `tmp\traps` の試験用ファイルだけ（毎回消して作り直す）。1つの試験の間だけ自分のプロセスの `PYTHONIOENCODING` を変えて元に戻します。システムの設定・レジストリ・あなたのファイルは変えません。
-- 手で `-SkipSlow` を付けずに動かすと、`%LOCALAPPDATA%\cc-win-kit-trap` に 5 MB の試験用ファイルを作り、最後に消します。`-SkipClaude` を付けないと、あなたの Claude Code で `claude -p "say hi"` を1回動かします。
+- 手で `-SkipSlow` を付けずに動かすと、`%LOCALAPPDATA%\cc-win-kit-trap` に 5 MB の試験用ファイルを作り、最後に消します。`-SkipClaude` を付けないと、あなたの Claude Code を2回動かします。`claude -p "say hi"`（T14）と、試験用のフックを付けて `tmp\traps` の中にファイルを1つ書かせる回（T15）です。
 - 結果は画面に出すだけです。
 
 ## ライセンス

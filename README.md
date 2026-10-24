@@ -1,6 +1,6 @@
 # claude-code-windows-traps
 
-A script that deliberately triggers 14 traps where Claude Code automation on Windows **breaks without an error**, and prints which ones happen on your machine. Read-only except for files under `tmp\traps` next to the script. Also packaged as a Claude Code plugin (`cc-win-traps`) with one skill, `win-traps-check`.
+A script that deliberately triggers 15 traps where Claude Code automation on Windows **breaks without an error**, and prints which ones happen on your machine. Read-only except for files under `tmp\traps` next to the script. Also packaged as a Claude Code plugin (`cc-win-traps`) with one skill, `win-traps-check`.
 
 ![Output on the author's machine: 13 of 13 traps reproduced (Japanese Windows 11, PowerShell 5.1, Python 3.13)](images/result.png)
 
@@ -25,18 +25,18 @@ The skill runs the script with `-SkipSlow -SkipClaude`, shows a table, and gives
 
 ## Use it without the plugin
 
-Needs Windows PowerShell 5.1 and Python (T14 also calls `claude`).
+Needs Windows PowerShell 5.1 and Python (T14 and T15 also call `claude`).
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 ```
 
 - `-SkipSlow` skips T13 (watching the size of a file being written, a few seconds)
-- `-SkipClaude` skips T14 (calls `claude`)
+- `-SkipClaude` skips T14 and T15 (they call `claude`)
 
 `REPRODUCED` means the trap happened on your machine. **Run it with `-File`**: calling it through `-Command` steps on T01 itself.
 
-## The 14 traps
+## The 15 traps
 
 | Id | What breaks | Author's machine |
 | --- | --- | --- |
@@ -54,6 +54,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 | T12 | backticks inside `"..."` become newlines or tabs | a newline appeared |
 | T13 | a file being written shows 0 bytes (under AppData) | listed 0, actual 5,000,000 |
 | T14 | `claude -p --allowedTools X "prompt"` swallows the prompt | `Input must be provided ...` |
+| T15 | a Python hook that denies every write lets one through into a folder with a non-ASCII name | `hook called=True written=True` (2026-10-24, Claude Code 2.1.310) |
 
 Author's machine: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Claude Code 2.1.304, Japanese Windows (code page 932), checked 2026-10-20/21.
 
@@ -79,13 +80,14 @@ Author's machine: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Cl
 | T12 | Use single-quoted here-strings (`@'...'@`) for text with backticks |
 | T13 | Open the file and read its length before concluding it is empty |
 | T14 | Send the prompt on stdin, not as a positional argument |
+| T15 | In the hook, read stdin as bytes and decode UTF-8: `json.loads(sys.stdin.buffer.read().decode("utf-8"))`; add `"onFailure": "block"` |
 
 A longer write-up (Japanese, free): https://note.com/sodateru_ai/n/na7d9ee2a36fa
 
 ## Troubleshooting
 
 - **"running scripts is disabled on this system"**: keep `-ExecutionPolicy Bypass` in the command.
-- **`CANNOT CHECK` on T04–T07 and T13**: these need a real Python. The script shows this when `python` is not on PATH or only the Microsoft Store stub answers (it prints nothing and exits 9009). Install Python 3 from python.org and run again.
+- **`CANNOT CHECK` on T04–T07, T13 and T15**: these need a real Python. The script shows this when `python` is not on PATH or only the Microsoft Store stub answers (it prints nothing and exits 9009). Install Python 3 from python.org and run again.
 - **Everything looks fine but your scheduled job still fails**: run the job's exact command line once by hand with `-File`, and compare the exit code with what Task Scheduler shows.
 - **The table is mojibake**: run it from Windows PowerShell 5.1, not from a shell that re-encodes output.
 
@@ -93,7 +95,7 @@ A longer write-up (Japanese, free): https://note.com/sodateru_ai/n/na7d9ee2a36fa
 
 - This plugin collects, stores and sends no personal data. It makes no network requests and has no telemetry.
 - The skill runs only the bundled `repro-traps.ps1`, with `-SkipSlow -SkipClaude`. In that mode the script writes only small test files under `tmp\traps` next to itself (deleted and recreated on each run), and sets `PYTHONIOENCODING` inside its own process for one test before restoring it. It does not change system settings, the registry or any of your files.
-- Run by hand without `-SkipSlow`, one extra test writes a 5 MB file to `%LOCALAPPDATA%\cc-win-kit-trap` and deletes it at the end. Without `-SkipClaude`, it runs `claude -p "say hi"` once through your own Claude Code.
+- Run by hand without `-SkipSlow`, one extra test writes a 5 MB file to `%LOCALAPPDATA%\cc-win-kit-trap` and deletes it at the end. Without `-SkipClaude`, it runs your own Claude Code twice: `claude -p "say hi"` (T14), and once with a test hook that asks it to write one file inside `tmp\traps` (T15).
 - Results are printed to the console only.
 
 ## Related

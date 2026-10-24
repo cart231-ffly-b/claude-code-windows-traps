@@ -21,7 +21,7 @@ $rows = @()
 # stub, which prints nothing and exits 9009) their verdicts mean nothing: T05 used to say REPRODUCED.
 $pyVer = ''
 try { $pyVer = [string]((& python -c "import sys; print('%d.%d.%d' % sys.version_info[:3])" 2>$null) | Select-Object -First 1) } catch {}
-$pyIds = @('T04', 'T05', 'T06', 'T07', 'T13')
+$pyIds = @('T04', 'T05', 'T06', 'T07', 'T13', 'T15')
 function Add([string]$id, [string]$trap, [bool]$repro, [string]$evidence) {
     $res = $(if ($repro) { 'REPRODUCED' } else { 'NOT REPRODUCED' })
     if (($pyIds -contains $id) -and [string]::IsNullOrEmpty($pyVer)) { $res = 'CANNOT CHECK'; $evidence = 'no real python (not on PATH, or only the Store stub)' }
@@ -135,6 +135,27 @@ if (-not $SkipSlow) {
 if (-not $SkipClaude) {
     $o14 = (& claude -p --allowedTools Read 'say hi' 2>&1 | Out-String)
     Add 'T14' 'claude -p --allowedTools X "prompt" swallows the prompt' ($o14 -match 'Input must be provided') (($o14.Trim() -split "`n")[0])
+
+    # T15 a Python PreToolUse hook that denies every write, reading stdin as text (json.load(sys.stdin)):
+    # stdin is decoded with the ANSI code page, a non-ASCII path breaks the JSON, the hook exits 1
+    # (non-blocking) and the write into a folder with a non-ASCII name goes through
+    $jpDir = Join-Path $tmp ($jp + [char]0x8A9E)
+    New-Item -ItemType Directory -Path $jpDir | Out-Null
+    $mark15 = Join-Path $tmp 'hook15_called.txt'
+    $hk15 = Join-Path $tmp 'deny_all.py'
+    [IO.File]::WriteAllText($hk15, "import sys, json`nopen(r'" + $mark15 + "', 'w').close()`ndata = json.load(sys.stdin)`nprint(json.dumps({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': 'deny_all'}}))`n")
+    $py15 = ''
+    try { $py15 = [string]((& python -c "import sys; print(sys.executable)" 2>$null) | Select-Object -First 1) } catch {}
+    $hs15 = Join-Path $tmp 'hook15.json'
+    [IO.File]::WriteAllText($hs15, '{"hooks":{"PreToolUse":[{"matcher":"Write|Edit","hooks":[{"type":"command","command":"\"' + ($py15 -replace '\\', '/') + '\" \"' + ($hk15 -replace '\\', '/') + '\""}]}]}}')
+    $target15 = Join-Path $jpDir 'written.txt'
+    $pf15 = Join-Path $tmp 'prompt15.md'
+    [IO.File]::WriteAllText($pf15, "Use the Write tool once to create the file $target15 with the content hi. Do not retry if it is blocked.", (New-Object Text.UTF8Encoding $false))
+    Push-Location $tmp
+    "Read the file $pf15 and do exactly what it says." | & claude -p --settings $hs15 --permission-mode acceptEdits --allowedTools 'Read,Write' | Out-Null
+    Pop-Location
+    $c15 = Test-Path -LiteralPath $mark15; $w15 = Test-Path -LiteralPath $target15
+    Add 'T15' 'Python deny hook lets a write into a non-ASCII folder through' ($c15 -and $w15) "hook called=$c15 written=$w15"
 }
 
 $rows | Format-Table -AutoSize -Wrap | Out-String -Width 220
