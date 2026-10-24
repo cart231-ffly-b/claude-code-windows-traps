@@ -56,6 +56,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 
 - https://note.com/sodateru_ai/n/ndad0eb6feaa6
 
+## プライバシー
+
+- 個人データを集めない・保存しない・送らない。通信も利用状況の送信もしません。
+- スキルが動かすのは同梱の `repro-traps.ps1` だけで、`-SkipSlow -SkipClaude` 付きです。このとき書き込むのはスクリプトの隣の `tmp\traps` の試験用ファイルだけ（毎回消して作り直す）。1つの試験の間だけ自分のプロセスの `PYTHONIOENCODING` を変えて元に戻します。システムの設定・レジストリ・あなたのファイルは変えません。
+- 手で `-SkipSlow` を付けずに動かすと、`%LOCALAPPDATA%\cc-win-kit-trap` に 5 MB の試験用ファイルを作り、最後に消します。`-SkipClaude` を付けないと、あなたの Claude Code で `claude -p "say hi"` を1回動かします。
+- 結果は画面に出すだけです。
+
 ## ライセンス
 
 MIT（[LICENSE](LICENSE)）。

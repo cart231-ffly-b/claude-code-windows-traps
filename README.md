@@ -89,6 +89,13 @@ A longer write-up (Japanese, free): https://note.com/sodateru_ai/n/na7d9ee2a36fa
 - **Everything looks fine but your scheduled job still fails**: run the job's exact command line once by hand with `-File`, and compare the exit code with what Task Scheduler shows.
 - **The table is mojibake**: run it from Windows PowerShell 5.1, not from a shell that re-encodes output.
 
+## Privacy
+
+- This plugin collects, stores and sends no personal data. It makes no network requests and has no telemetry.
+- The skill runs only the bundled `repro-traps.ps1`, with `-SkipSlow -SkipClaude`. In that mode the script writes only small test files under `tmp\traps` next to itself (deleted and recreated on each run), and sets `PYTHONIOENCODING` inside its own process for one test before restoring it. It does not change system settings, the registry or any of your files.
+- Run by hand without `-SkipSlow`, one extra test writes a 5 MB file to `%LOCALAPPDATA%\cc-win-kit-trap` and deletes it at the end. Without `-SkipClaude`, it runs `claude -p "say hi"` once through your own Claude Code.
+- Results are printed to the console only.
+
 ## Related
 
 The author also sells **cc-win-kit** ($19), which adds a write guard for Claude Code, an unattended runner and a doctor that scans your files for these traps: https://payhip.com/b/bRnDJ . This repository works on its own without it.
