@@ -51,11 +51,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\repro-traps.ps1
 
 症状と確かめ方、直し方は無料の記事にまとめています。
 
-- エラーなしで壊れる14か所（note）: https://note.com/sodateru_ai/n/na7d9ee2a36fa
+- 14か所の原因と直し方（Zenn の本、0〜4章は無料）: https://zenn.dev/kamijo_aoto/books/windows-claude-code-traps
 
-14か所を最初から踏まないようにした部品（書き込み先を絞る安全装置、夜の無人実行、健康診断、CLAUDE.md の型、試験一式）は「cc-win-kit」として有料で出しています（note、2026年10月31日公開）。このスクリプトは、キットが無くても単独で使えます。
+14か所を最初から踏まないようにした部品（書き込み先を絞る安全装置、夜の無人実行、健康診断、CLAUDE.md の型、試験一式）は「cc-win-kit」として有料で出しています（Payhip、$19。説明は英語、README は日本語と英語）。このスクリプトは、キットが無くても単独で使えます。
 
-- https://note.com/sodateru_ai/n/ndad0eb6feaa6
+- https://payhip.com/b/bRnDJ
 
 ## プライバシー
 

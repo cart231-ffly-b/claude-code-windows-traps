@@ -82,7 +82,7 @@ Author's machine: Windows 11 / Windows PowerShell 5.1.26100 / Python 3.13.7 / Cl
 | T14 | Send the prompt on stdin, not as a positional argument |
 | T15 | In the hook, read stdin as bytes and decode UTF-8: `json.loads(sys.stdin.buffer.read().decode("utf-8"))`; add `"onFailure": "block"` |
 
-A longer write-up (Japanese, free): https://note.com/sodateru_ai/n/na7d9ee2a36fa
+A longer write-up (Japanese book on Zenn, chapters 0-4 free): https://zenn.dev/kamijo_aoto/books/windows-claude-code-traps
 
 ## Troubleshooting
 
