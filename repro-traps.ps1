@@ -156,6 +156,30 @@ if (-not $SkipClaude) {
     Pop-Location
     $c15 = Test-Path -LiteralPath $mark15; $w15 = Test-Path -LiteralPath $target15
     Add 'T15' 'Python deny hook lets a write into a non-ASCII folder through' ($c15 -and $w15) "hook called=$c15 written=$w15"
+
+    # T16 a hook command written as an unquoted backslash path: with Git for Windows, Claude Code runs
+    # the command through Git Bash, which eats the backslashes, exits 127 (non-blocking) and the write
+    # goes through. The same deny.cmd as a quoted forward-slash path is the control (must block).
+    $cmd16 = Join-Path $tmp 'deny16.cmd'
+    $mark16 = Join-Path $tmp 'hook16_called.txt'
+    [IO.File]::WriteAllText($cmd16, ((@('@echo off', 'more > nul', ('echo x> "' + $mark16 + '"'), 'exit /b 2') -join "`r`n") + "`r`n"))
+    $res16 = @{}
+    foreach ($k in @('fwd', 'back')) {
+        $w16 = Join-Path $tmp "hook16_$k"
+        New-Item -ItemType Directory -Path $w16 | Out-Null
+        $c = $(if ($k -eq 'fwd') { '\"' + ($cmd16 -replace '\\', '/') + '\"' } else { $cmd16 -replace '\\', '\\' })
+        [IO.File]::WriteAllText("$w16\s.json", '{"hooks":{"PreToolUse":[{"matcher":"Write|Edit","hooks":[{"type":"command","command":"HOOK"}]}]}}'.Replace('HOOK', $c))
+        Push-Location $w16
+        'Use the Write tool once to create the file written.txt with the content hi. Do not retry if it is blocked.' | & claude -p --settings s.json --permission-mode acceptEdits | Out-Null
+        Pop-Location
+        if ($k -eq 'fwd') { $res16['called'] = Test-Path -LiteralPath $mark16 }
+        $res16[$k] = Test-Path -LiteralPath "$w16\written.txt"
+    }
+    if ((-not $res16['called']) -or $res16['fwd']) {
+        $script:rows += [pscustomobject]@{ Id = 'T16'; Trap = 'hook command as an unquoted backslash path never starts (127)'; Result = 'CANNOT CHECK'; Evidence = "control (quoted C:/ path) did not block: called=$($res16['called']) written=$($res16['fwd'])" }
+    } else {
+        Add 'T16' 'hook command as an unquoted backslash path never starts (127)' $res16['back'] "quoted C:/ path blocked; C:\ path written=$($res16['back'])"
+    }
 }
 
 $rows | Format-Table -AutoSize -Wrap | Out-String -Width 220
